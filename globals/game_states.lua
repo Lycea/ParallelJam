@@ -5,3 +5,5 @@ GameStates.PAUSED = 1
 GameStates.DEAD = 2
 GameStates.LOAD_LEVEL = 3
 GameStates.MENUE = 4
+GameStates.EDIT  = 5
+GameStates.LOAD  = 6

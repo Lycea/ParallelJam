@@ -8,6 +8,9 @@
    a = "left",
    d = "right",
    s = "down",
+   e = "edit",
+   r = "remove",
+   n = "new",
    space = "space",
    escape = "exit",
    x = "dash",
@@ -31,6 +34,7 @@ key_list_game={
   space ={jump= true},
   exit = {exit = true},
   dash = {dash = true},
+  edit = {editor = true},
   default={},
   mt={
      __index=function(table,key) 
@@ -40,6 +44,22 @@ key_list_game={
      }
 }
 
+key_list_edit={
+    edit ={editor=true},
+    left ={switch_type=-1},
+    right={switch_type=1},
+    down ={save=true},
+    new  ={clear_world=true},
+    dash ={invert=true},
+    remove = {remove=true},
+    
+    mt={
+     __index=function(table,key) 
+      return  {}
+     end
+     
+     }
+}
 
 
 
@@ -55,6 +75,8 @@ key_list_dead={
 
 setmetatable(key_list_dead,key_list_dead.mt)
 setmetatable(key_list_game,key_list_game.mt)
+setmetatable(key_list_edit,key_list_edit.mt)
+
 
 
 
@@ -69,6 +91,7 @@ function handle_keys(key)
       [GameStates.DEAD] = key_list_dead,
       [GameStates.LOAD_LEVEL] = key_list_dead,
       [GameStates.MENUE] = key_list_dead,
+      [GameStates.EDIT] = key_list_edit
     }
 
      return state_caller_list[game_state][key_mapper[key]]
