@@ -44,3 +44,8 @@ end
 function love.mousemoved(x,y,dx,dy)
     game.mousemove(x,y,dx,dy)
 end
+
+function love.textinput(txt)
+    game.text(txt)
+end
+

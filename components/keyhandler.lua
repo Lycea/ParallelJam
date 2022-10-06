@@ -9,11 +9,19 @@
    d = "right",
    s = "down",
    w = "up",
+
+   down = "select_down",
+   up = "select_up",
+
    e = "edit",
    r = "remove",
    n = "new",
    space = "space",
    escape = "exit",
+
+   backspace = "rem_key",
+
+
    l="load",
    x = "dash",
 
@@ -51,6 +59,10 @@ key_list_edit={
     left ={switch_type=-1},
     right={switch_type=1},
     down ={save=true},
+
+    select_down={option_idx=1},
+    select_up  ={option_idx=-1},
+
     new  ={clear_world=true},
     dash ={invert=true},
     remove = {remove=true},
@@ -78,6 +90,23 @@ key_list_dead={
 }
 
 
+key_list_txt_input ={
+  select_down={option_idx=1},
+  select_up  ={option_idx=-1},
+
+  left ={cursor_move=-1},
+  right ={cursor_move=1},
+
+  rem_key = {remove_key = true},
+
+  mt={
+    __index=function(table,key) 
+     return  {}
+    end
+    
+    }
+}
+
 
 key_list_load={
     down  = {switch_file = 1},
@@ -100,6 +129,7 @@ setmetatable(key_list_dead,key_list_dead.mt)
 setmetatable(key_list_game,key_list_game.mt)
 setmetatable(key_list_edit,key_list_edit.mt)
 setmetatable(key_list_load,key_list_load.mt)
+setmetatable(key_list_txt_input,key_list_txt_input.mt)
 
 
 
@@ -115,7 +145,8 @@ function handle_keys(key)
       [GameStates.DEAD] = key_list_dead,
       [GameStates.LOAD_LEVEL] = key_list_load,
       [GameStates.MENUE] = key_list_dead,
-      [GameStates.EDIT] = key_list_edit
+      [GameStates.EDIT] = key_list_edit,
+      [GameStates.TXT_INPUT]=key_list_txt_input
       
     }
 
@@ -130,7 +161,8 @@ function get_keys()
       [GameStates.DEAD] = key_list_dead,
       [GameStates.LOAD_LEVEL] = key_list_load,
       [GameStates.MENUE] = key_list_dead,
-      [GameStates.EDIT] = key_list_edit
+      [GameStates.EDIT] = key_list_edit,
+      [GameStates.TXT_INPUT] = key_list_txt_input
       
     }
 	

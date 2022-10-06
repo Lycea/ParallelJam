@@ -9,6 +9,7 @@ require("components.file_splorer")
 
 
 
+
 local game ={}
 
 gravity = 800
@@ -23,6 +24,12 @@ local keylist = {}
 
 player = nil
 
+
+--option idx 
+option_idx = 1
+
+--save infos
+save_name = "<default>"
 
 
 local object_list={}
@@ -130,7 +137,8 @@ function game.update(dt)
                 debuger.on()
                 local lvl_name = splorer.get_selected()
                 print("Loading lvl...",lvl_name)
-                   
+                
+                save_name = string.gsub(lvl_name,"[.]txt","")
                 
                 local chunk =love.filesystem.load(lvl_name)
                 local level_data = chunk()
@@ -158,12 +166,25 @@ function game.update(dt)
                 debuger.off()
             end
 
-        elseif game_state == GameStates.EDIT then
+        elseif game_state == GameStates.EDIT or game_state == GameStates.TXT_INPUT then
+
             if action["editor"] then
                 game_state = GameStates.PLAYING
                 
                 player = creator.player(world,50,50)
+
+            elseif action["remove_key"] and select_timer:is_done()then
+                save_name = string.sub(save_name,0,math.max(0,#save_name-1))
+                select_timer:update()
+            elseif action["option_idx"] and select_timer:is_done() then
+                option_idx=option_idx+ action["option_idx"]
+                if option_idx >2 then option_idx = 1 end
+                if option_idx<1 then option_idx = 2 end
+                states_ = {[1]=GameStates.EDIT, [2]=GameStates.TXT_INPUT}
+                game_state = states_[option_idx]
+                select_timer:update()
             elseif action["switch_type"] and select_timer:is_done() then
+            
             
                 object_type = object_type + action["switch_type"]
                 if object_type > #object_types then
@@ -177,8 +198,15 @@ function game.update(dt)
                 game_state = GameStates.LOAD_LEVEL
                 splorer.get_files()
             elseif action["save"] then
-                local file = io.open(os.time().."testlevel.txt","w")
+
+                local file = save_name == "<default>" and io.open(os.time().."testlevel.txt","w") or io.open(save_name..".txt","w")
                 
+
+                if not file then
+                    print("Not able to save file :(")
+                    return
+                end
+
                 file:write("local data ={\n")
                 for _,data in pairs(object_list) do
                     file:write("{"..'"'..data[1]..'"'..","
@@ -199,6 +227,7 @@ function game.update(dt)
                 object_list = {}
                 
                 world = creator.newWorld()
+                save_name="<default>"
             elseif action["invert"] and invert_timer:is_done() then
                 gravity = gravity*-1
                 print(gravity)
@@ -299,8 +328,11 @@ function game.draw()
 
     
     
-    if game_state == GameStates.EDIT or game_state == GameStates.LOAD_LEVEL then
-        love.graphics.print(object_types[object_type],0,30)
+    if game_state == GameStates.EDIT or game_state == GameStates.LOAD_LEVEL or game_state == GameStates.TXT_INPUT then
+        love.graphics.print("Block type: "..object_types[object_type],20,30)
+        love.graphics.print("Save name: "..save_name,20,40)
+
+        love.graphics.rectangle("line",5,option_idx *10 +20 +5,5,5)
         
          if selected_item then
           local rect=object_list[selected_item][2]
@@ -322,7 +354,7 @@ function game.draw()
         end
     end
     
-    
+   
    
    if game_state == GameStates.LOAD_LEVEL then
        splorer.draw()
@@ -344,6 +376,7 @@ function game.keyHandle(k,s,r,pressed)
         keylist[k] = nil
     end
     
+    print(k,s,r)
     
 end
 
@@ -445,6 +478,15 @@ function game.mousemove(x,y,dx,dy)
   
   debuger.off()
   selected_item = nil
+end
+
+
+
+function game.text(txt)
+    if game_state == GameStates.TXT_INPUT then
+        save_name=save_name..txt
+    end
+
 end
 
 return game
