@@ -4,6 +4,7 @@ require("components.creator")
 require("globals.game_states")
 require("components.keyhandler")
 Timer = require("components.timer")
+require("components.file_splorer")
 
 
 
@@ -32,7 +33,8 @@ local object_types ={
   [2]="Mob",
   [3]="Door",
   [4]="Spike",
-  [5]="Spawn"
+  [5]="Spawn",
+  [6]="Collectible"
 }
 
 
@@ -58,6 +60,9 @@ local selected_item = nil
 local delete_timer = Timer(0.1)
 
 local invert_timer = Timer(0.1)
+local exit_timer   = Timer(0.1)
+
+
 
 
 
@@ -115,8 +120,44 @@ function game.update(dt)
                 allow_jump = false
             end
             
-            
-            
+        elseif game_state == GameStates.LOAD_LEVEL then
+            if action["editor"] then
+                game_state = GameStates.EDIT
+            elseif action["switch_file"] and select_timer:is_done()==true then
+                select_timer:update()
+                splorer.idx_change(action["switch_file"])
+            elseif action["load_level"] then
+                debuger.on()
+                local lvl_name = splorer.get_selected()
+                print("Loading lvl...",lvl_name)
+                   
+                
+                local chunk =love.filesystem.load(lvl_name)
+                local level_data = chunk()
+                
+                creator.deleteWorld(world)
+                object_list = nil
+                object_list = {}
+                
+                world = creator.newWorld()
+                
+                
+                for id, obj in pairs(level_data) do
+                    print(obj[1])
+                    local rec ={x=obj.x,y=obj.y,w=obj.w,h=obj.h}
+                            table.insert(object_list,{obj[1],rec,
+                                            gen_object(obj[1],
+                                            rec.x,rec.y,
+                                            rec.w,rec.h
+                                                      )
+                                                     }
+                                        )
+                end
+                
+                
+                debuger.off()
+            end
+
         elseif game_state == GameStates.EDIT then
             if action["editor"] then
                 game_state = GameStates.PLAYING
@@ -131,6 +172,10 @@ function game.update(dt)
                     object_type = #object_types
                 end
                 select_timer:update()
+            elseif action["load"] then
+                print("opening loading menue...")
+                game_state = GameStates.LOAD_LEVEL
+                splorer.get_files()
             elseif action["save"] then
                 local file = io.open(os.time().."testlevel.txt","w")
                 
@@ -224,11 +269,12 @@ local function draw_objects()
         --love.graphics.stencil(stencil,"replace",1)
         --love.graphics.setStencilTest("greater", 0)
         
-        love.graphics.rectangle("fill", obj_[2].x,obj_[2].y,obj_[2].w,obj_[2].h) 
+        --love.graphics.rectangle("fill", obj_[2].x,obj_[2].y,obj_[2].w,obj_[2].h) 
         --love.graphics.setStencilTest()
         
         love.graphics.rectangle("line", obj_[2].x,obj_[2].y,obj_[2].w,obj_[2].h) 
         
+		love.graphics.setColor(1,1,1)
     end
      
     
@@ -253,7 +299,7 @@ function game.draw()
 
     
     
-    if game_state == GameStates.EDIT  then
+    if game_state == GameStates.EDIT or game_state == GameStates.LOAD_LEVEL then
         love.graphics.print(object_types[object_type],0,30)
         
          if selected_item then
@@ -277,6 +323,10 @@ function game.draw()
     end
     
     
+   
+   if game_state == GameStates.LOAD_LEVEL then
+       splorer.draw()
+   end
    
     love.graphics.scale(scale,scale)
     

@@ -15,6 +15,7 @@ function creator.newWorld()
     
     _world:addCollisionClass("Spike")
     _world:addCollisionClass("Spawn",{ignores={"Mob"}})
+    _world:addCollisionClass("Collectible",{ignores={"Mob"}})
     
     
 

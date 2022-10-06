@@ -8,11 +8,13 @@
    a = "left",
    d = "right",
    s = "down",
+   w = "up",
    e = "edit",
    r = "remove",
    n = "new",
    space = "space",
    escape = "exit",
+   l="load",
    x = "dash",
 
    mt={
@@ -52,6 +54,8 @@ key_list_edit={
     new  ={clear_world=true},
     dash ={invert=true},
     remove = {remove=true},
+    exit = {exit=true},
+    load={load=true},
     
     mt={
      __index=function(table,key) 
@@ -73,9 +77,29 @@ key_list_dead={
      }
 }
 
+
+
+key_list_load={
+    down  = {switch_file = 1},
+    up    = {switch_file =-1},
+    space = {load_level  =true},
+    exit  = {editor      =true},
+    
+    mt={
+     __index=function(table,key) 
+      return  {}
+     end
+     
+     }
+}
+
+
+
+
 setmetatable(key_list_dead,key_list_dead.mt)
 setmetatable(key_list_game,key_list_game.mt)
 setmetatable(key_list_edit,key_list_edit.mt)
+setmetatable(key_list_load,key_list_load.mt)
 
 
 
@@ -89,13 +113,32 @@ function handle_keys(key)
       [GameStates.PLAYING] = key_list_game,
       [GameStates.PAUSED] = key_list_dead,
       [GameStates.DEAD] = key_list_dead,
-      [GameStates.LOAD_LEVEL] = key_list_dead,
+      [GameStates.LOAD_LEVEL] = key_list_load,
       [GameStates.MENUE] = key_list_dead,
       [GameStates.EDIT] = key_list_edit
+      
     }
 
      return state_caller_list[game_state][key_mapper[key]]
 end
+
+
+function get_keys()
+	    local state_caller_list ={
+      [GameStates.PLAYING] = key_list_game,
+      [GameStates.PAUSED] = key_list_dead,
+      [GameStates.DEAD] = key_list_dead,
+      [GameStates.LOAD_LEVEL] = key_list_load,
+      [GameStates.MENUE] = key_list_dead,
+      [GameStates.EDIT] = key_list_edit
+      
+    }
+	
+	for key,action in pairs(key_list) do
+		print(key.." = "..action)
+	end
+end
+
 
 
 --------------------------------------------------------------------------------------
